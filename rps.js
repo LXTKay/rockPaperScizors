@@ -1,5 +1,8 @@
 "use strict"
 
+const tBox = document.querySelector("#text");
+let turns = 1;
+
 function randomNumberBetween(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 };
@@ -46,43 +49,59 @@ function playRound(playerSelection, computerSelection) {
 };
 
 function getUserInput(){
-  let safetyToken;
-  do{
-    safetyToken = false;
-    let selection = prompt("Select your tool!", " ");
-    if(selection.toLowerCase() == "rock"
-    || selection.toLowerCase() == "paper"
-    || selection.toLowerCase() == "scizor") return selection;
-    alert("You had a typo in your input. Try again!");
-    safetyToken = true;
-  } while (safetyToken);
+ return userInput;
 };
 
-function game(){
-  console.log("We are going to play 5 rounds of Rock Paper Scizor!");
-  let userPoints = 0;
-  let cpuPoints = 0;
-  for(let i = 1; i <= 5; i++){
-    console.log("Ready for round " + i);
-    let round = playRound(getUserInput(), getComputerChoice());
-    console.log(round);
-    if(round.includes("win")) ++userPoints;
-    if(round.includes("lose")) ++cpuPoints;
-    console.log("The current score is:");
-    console.log("You: " + userPoints + " Computer: " + cpuPoints);
-    if(cpuPoints == 3){
-      i = 5;
-      console.log("You can't win the game anymore!");
-    };
-  };
-  if(userPoints > cpuPoints){
-    console.log("Congratulations!!! You won the game!");
-  } else {
-    console.log("You lost the game!")
+const text = {
+  write(input){
+    tBox.append(input + "\n");
+  },
+  delete(){
+    tBox.innerText = "";
   }
-  console.log("The final score is:");
-  console.log("You " + userPoints + " : " + cpuPoints + " Computer");
-  console.log("Reload to play again!");
+};
+
+let userPoints = 0;
+let cpuPoints = 0;
+
+function game(){
+  text.write("We are going to play Rock Paper Scizor until 5 points!");
+  text.write("Ready for round " + turns);
 }
+
+function gameEnd(){
+  text.delete();
+  if(userPoints > cpuPoints){
+    text.write("Congratulations!!! You won the game!");
+  } else {
+    text.write("You lost the game!")
+  }
+  text.write("The final score is:");
+  text.write("You " + userPoints + " : " + cpuPoints + " Computer");
+  text.write("Reload to play again!");
+  document.querySelector("#buttons").removeEventListener("click", handleClick);
+};
+
+function handleClick(e){
+  let userInput = e.target.innerText;
+
+  let round = playRound(userInput, getComputerChoice());
+  text.delete();
+  text.write(round);
+  if (round.includes("win")) ++userPoints;
+  if (round.includes("lose")) ++cpuPoints;
+  text.write("The current score is:");
+  text.write("You: " + userPoints + " Computer: " + cpuPoints);
+
+  if(userPoints == 5
+  || cpuPoints == 5){
+    gameEnd();
+    return;
+  }
+  turns++;
+  text.write("Ready for round " + turns);
+};
+
+document.querySelector("#buttons").addEventListener("click", handleClick);
 
 game();
